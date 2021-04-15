@@ -5,8 +5,8 @@ public class CacheService {
     private static boolean useLRU = false;
     private static int maximunItems = 0;
     private static int garbageCacheCollectorTime = 7000;
-    private static CacheItem head = null;
-    private static CacheItem tail = null;
+    private static Cache head = null;
+    private static Cache tail = null;
 
     public CacheService() {
     }
@@ -28,7 +28,7 @@ public class CacheService {
     }
 
     /* If LRU is active this will put the item into the list */
-    private static void PutToList(CacheItem item) {
+    private static void PutToList(Cache item) {
         if (CacheService.head != null) {
             CacheService.head.setNext(item);
             item.setPrevious(head);
@@ -40,9 +40,9 @@ public class CacheService {
     }
 
     /* If LRU is active this will remove the item from the list */
-    private static void RemoveFromList(CacheItem item) {
-        CacheItem next = (CacheItem) item.getNext();
-        CacheItem previous = (CacheItem) item.getPrevious();
+    private static void RemoveFromList(Cache item) {
+        Cache next = (Cache) item.getNext();
+        Cache previous = (Cache) item.getPrevious();
         if (next != null) {
             next.setPrevious(previous);
         }
@@ -58,7 +58,7 @@ public class CacheService {
     }
 
     /* the item is eliminated from the cache */
-    private static void RemoveFromCache(CacheItem item) {
+    private static void RemoveFromCache(Cache item) {
         if (CacheService.useLRU) {
             RemoveFromList(item);
         }
@@ -67,7 +67,7 @@ public class CacheService {
     }
 
     /* a new item is push to the cache */
-    public static void PutCache(CacheItem item) {
+    public static void PutCache(Cache item) {
         /*
          * if the LRU is active and the cache is full and is a new item then the last is
          * eliminated to insert the new one
@@ -83,8 +83,8 @@ public class CacheService {
     }
 
     /* this will retraive the value from the cache */
-    public static CacheItem GetCache(Object key) {
-        CacheItem item = (CacheItem) CacheService.cacheHash.get(key);
+    public static Cache GetCache(Object key) {
+        Cache item = (Cache) CacheService.cacheHash.get(key);
         if (item == null) {
             /*
              * the item do not exists in the cache miss cache
@@ -125,7 +125,7 @@ public class CacheService {
                             Iterator<Object> keys = keySet.iterator();
                             while (keys.hasNext()) {
                                 Object key = keys.next();
-                                CacheItem item = (CacheItem) CacheService.cacheHash.get(key);
+                                Cache item = (Cache) CacheService.cacheHash.get(key);
                                 if (item.isExpired()) {
                                     RemoveFromCache(item);
                                 }
