@@ -28,11 +28,11 @@ public class App {
             case "2":
                 System.out.println("Enter key:");
                 key = scanner.nextLine();
-                item = (CacheItem) CacheService.GetCache(key);
+                item = (CacheItem) CacheService.GetCache(key, null);
                 if (item == null) {
                     System.out.println("Cache miss");
                 } else {
-                    System.out.println(item.getValue());
+                    System.out.println(item.GetValue());
                 }
                 break;
 

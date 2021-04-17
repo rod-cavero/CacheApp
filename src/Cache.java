@@ -1,21 +1,16 @@
-public interface Cache {
-
+public interface Cache extends ListItem {
     /* This method will return the key of the cache element */
-    public Object getKey();
+    public Object GetKey();
 
     /* This method will return the value of the cache element */
-    public Object getValue();
+    public Object GetValue();
 
     /* every element should determine its own expiration */
-    public boolean isExpired();
+    public boolean IsExpired();
 
-    /* The next methodes will provide the interface necesary for handdling LRU */
-    public Cache getNext();
+    /* This method will read the value from the DB if is not in cache */
+    public boolean PullValue();
 
-    public void setNext(Cache next);
-
-    public Cache getPrevious();
-
-    public void setPrevious(Cache previous);
-
+    /* this method will write the value to the DB if its changue in the cache */
+    public boolean PushValue();
 }

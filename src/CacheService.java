@@ -27,11 +27,11 @@ public class CacheService {
         CacheService.garbageCacheCollectorTime = garbageCacheCollectorTime;
     }
 
-    /* If LRU is active this will put the item into the list */
-    private static void PutToList(Cache item) {
+    /* If LRU is active this will add the item into the list at the head */
+    private static void AddToList(Cache item) {
         if (CacheService.head != null) {
-            CacheService.head.setNext(item);
-            item.setPrevious(head);
+            CacheService.head.SetNext(item);
+            item.SetPrevious(head);
         }
         CacheService.head = item;
         if (CacheService.tail == null) {
@@ -41,13 +41,13 @@ public class CacheService {
 
     /* If LRU is active this will remove the item from the list */
     private static void RemoveFromList(Cache item) {
-        Cache next = (Cache) item.getNext();
-        Cache previous = (Cache) item.getPrevious();
+        Cache next = (Cache) item.GetNext();
+        Cache previous = (Cache) item.GetPrevious();
         if (next != null) {
-            next.setPrevious(previous);
+            next.SetPrevious(previous);
         }
         if (previous != null) {
-            previous.setNext(next);
+            previous.SetNext(next);
         }
         if (CacheService.head == item) {
             CacheService.head = previous;
@@ -62,35 +62,56 @@ public class CacheService {
         if (CacheService.useLRU) {
             RemoveFromList(item);
         }
-        cacheHash.remove(item.getKey());
+        cacheHash.remove(item.GetKey());
         item = null;
     }
 
     /* a new item is push to the cache */
     public static void PutCache(Cache item) {
+
+        /* Check is the key is in the hash */
+        if (CacheService.cacheHash.containsKey(item.GetKey())) {
+            Cache oldItem = (Cache) CacheService.cacheHash.get(item.GetKey());
+            /* if the value is the same exit and do nothing */
+            if (oldItem.GetValue() == item.GetValue()) {
+                return;
+            }
+        }
         /*
-         * if the LRU is active and the cache is full and is a new item then the last is
-         * eliminated to insert the new one
+         * if the LRU is active and the cache is full then the last is eliminated to
+         * insert the new one
          */
-        if (CacheService.useLRU && CacheService.cacheHash.size() == maximunItems
-                && CacheService.cacheHash.containsKey(item.getKey()) == false) {
+        else if (CacheService.useLRU && CacheService.cacheHash.size() == maximunItems) {
             RemoveFromCache(CacheService.tail);
         }
-        CacheService.cacheHash.put(item.getKey(), item);
+        CacheService.cacheHash.put(item.GetKey(), item);
         if (CacheService.useLRU) {
-            PutToList(item);
+            AddToList(item);
         }
+        /* write to disk the value */
+        item.PushValue();
     }
 
-    /* this will retraive the value from the cache */
-    public static Cache GetCache(Object key) {
+    /*
+     * this will retraive the value from the cache key is the identifier of the
+     * cache readobject is the cache object in which the value will be read from
+     * disk if is not in the cache
+     */
+    public static Cache GetCache(Object key, Cache readObject) {
         Cache item = (Cache) CacheService.cacheHash.get(key);
         if (item == null) {
             /*
-             * the item do not exists in the cache miss cache
+             * the item do not exists in the cache, so use the readObject and read from disk
              */
-            return null;
-        } else if (item.isExpired()) {
+            if (readObject != null && readObject.PullValue()) {
+                /* if read was succed add to the cache and return it */
+                PutCache(readObject);
+                return readObject;
+            } else {
+                /* cant read the value from disk return a miss cache */
+                return null;
+            }
+        } else if (item.IsExpired()) {
             /*
              * the item exist in the cache but is expired so its remove from the cache and
              * send a miss cache
@@ -101,7 +122,7 @@ public class CacheService {
             if (CacheService.useLRU && CacheService.head != item) {
                 /* if lRU is active the item is put to head of the list */
                 RemoveFromList(item);
-                PutToList(item);
+                AddToList(item);
             }
             return item;
         }
@@ -126,7 +147,7 @@ public class CacheService {
                             while (keys.hasNext()) {
                                 Object key = keys.next();
                                 Cache item = (Cache) CacheService.cacheHash.get(key);
-                                if (item.isExpired()) {
+                                if (item.IsExpired()) {
                                     RemoveFromCache(item);
                                 }
                             }

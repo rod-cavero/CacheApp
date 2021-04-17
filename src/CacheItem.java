@@ -23,17 +23,17 @@ public class CacheItem implements Cache {
     }
 
     @Override
-    public Object getKey() {
+    public Object GetKey() {
         return this.key;
     }
 
     @Override
-    public Object getValue() {
+    public Object GetValue() {
         return this.value;
     }
 
     @Override
-    public boolean isExpired() {
+    public boolean IsExpired() {
         if (expiration == null) {
             /* no expiration cache lives permanently */
             return false;
@@ -48,23 +48,34 @@ public class CacheItem implements Cache {
     }
 
     @Override
-    public Cache getNext() {
+    public boolean PullValue() {
+        /* Implement code here for write to disk or DB */
+        return false;
+    }
+
+    @Override
+    public boolean PushValue() {
+        /* Implement code here for read from disk or DB */
+        return false;
+    }
+
+    @Override
+    public Object GetNext() {
         return this.next;
     }
 
     @Override
-    public void setNext(Cache next) {
-        this.next = next;
+    public void SetNext(Object next) {
+        this.next = (Cache) next;
     }
 
     @Override
-    public Cache getPrevious() {
+    public Object GetPrevious() {
         return this.previous;
     }
 
     @Override
-    public void setPrevious(Cache previous) {
-        this.previous = previous;
+    public void SetPrevious(Object previous) {
+        this.previous = (Cache) previous;
     }
-
 }
