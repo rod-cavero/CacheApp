@@ -113,14 +113,21 @@ public class CacheService {
             }
         } else if (item.IsExpired()) {
             /*
-             * the item exist in the cache but is expired so its remove from the cache and
-             * send a miss cache
+             * the item exist in the cache but is expired, call the pullvalue method to
+             * refresh data
              */
-            RemoveFromCache(item);
-            return null;
+            if (item.PullValue()) {
+                return item;
+            } else {
+                /*
+                 * if couldnt refresh data remove from the cache and send a miss cache
+                 */
+                RemoveFromCache(item);
+                return null;
+            }
         } else {
             if (CacheService.useLRU && CacheService.head != item) {
-                /* if lRU is active the item is put to head of the list */
+                /* if lRU is active the item is put to the head of the list */
                 RemoveFromList(item);
                 AddToList(item);
             }
